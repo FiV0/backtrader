@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import backtrader as bt
 from backtrader.feed import DataBase
@@ -67,6 +67,15 @@ class CCXT(DataBase):
         self._last_id = '' # last processed trade id for ohlcv
         self._last_ts = 0 # last processed timestamp for ohlcv
 
+        self.candlelength = {
+            bt.TimeFrame.Seconds : lambda x: timedelta(seconds=x),
+            bt.TimeFrame.Minutes : lambda x: timedelta(minutes=x),
+            bt.TimeFrame.Days : lambda x: timedelta(days=x),
+            bt.TimeFrame.Weeks : lambda x: timedelta(weeks=x),
+            bt.TimeFrame.Months : lambda x: timedelta(days=x*30),
+            bt.TimeFrame.Years : lambda x: timedelta(days=x*365)
+        }
+
     def start(self, ):
         DataBase.start(self)
 
@@ -108,6 +117,7 @@ class CCXT(DataBase):
     def _fetch_ohlcv(self, fromdate=None):
         """Fetch OHLCV data into self._data queue"""
         granularity = self.store.get_granularity(self._timeframe, self._compression)
+        candlelength = self.candlelength[self._timeframe](self._compression)
 
         if fromdate:
             since = int((fromdate - datetime(1970, 1, 1)).total_seconds() * 1000)
@@ -127,6 +137,12 @@ class CCXT(DataBase):
                     continue
 
                 tstamp = ohlcv[0]
+
+                #currently considered candle has not yet finished
+                #assuming the timestamp is from the beginning of thd candle
+                if datetime.utcfromtimestamp(tstamp / 1000) + candlelength > datetime.utcnow():
+                    continue
+
                 if tstamp > self._last_ts:
                     self._data.append(ohlcv)
                     self._last_ts = tstamp
