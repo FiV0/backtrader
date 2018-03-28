@@ -57,9 +57,10 @@ class CCXT(DataBase):
     # States for the Finite State Machine in _load
     _ST_LIVE, _ST_HISTORBACK, _ST_OVER = range(3)
 
-    def __init__(self, exchange, symbol, ohlcv_limit=None, config={}, retries=5):
+    def __init__(self, exchange, symbol, ohlcv_limit=None, config={}, retries=5, partial=False):
         self.symbol = symbol
         self.ohlcv_limit = ohlcv_limit
+        self.partial = partial
 
         self.store = CCXTStore(exchange, config, retries)
 
@@ -140,7 +141,8 @@ class CCXT(DataBase):
 
                 #currently considered candle has not yet finished
                 #assuming the timestamp is from the beginning of thd candle
-                if datetime.utcfromtimestamp(tstamp / 1000) + candlelength > datetime.utcnow():
+                if ( not self.partial and
+                     datetime.utcfromtimestamp(tstamp / 1000) + candlelength > datetime.utcnow()):
                     continue
 
                 ohlcv[0] += candlelength.total_seconds() * 1000
