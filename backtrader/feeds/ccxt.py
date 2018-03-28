@@ -145,7 +145,8 @@ class CCXT(DataBase):
                      datetime.utcfromtimestamp(tstamp / 1000) + candlelength > datetime.utcnow()):
                     continue
 
-                ohlcv[0] += candlelength.total_seconds() * 1000
+                ohlcv[0] += int(candlelength.total_seconds()) * 1000
+                tstamp = ohlcv[0]
 
                 if tstamp > self._last_ts:
                     self._data.append(ohlcv)
