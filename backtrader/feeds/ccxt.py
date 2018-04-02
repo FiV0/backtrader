@@ -133,7 +133,9 @@ class CCXT(DataBase):
         while True:
             dlen = len(self._data)
             for ohlcv in sorted(self.store.fetch_ohlcv(self.symbol, timeframe=granularity,
-                                                       since=since, limit=limit)):
+                                                       since=since, limit=limit),
+                                key=lambda ohlcv: ohlcv[0]):
+
                 if None in ohlcv:
                     continue
 
