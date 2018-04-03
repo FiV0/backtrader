@@ -98,6 +98,9 @@ class CCXTBroker(BrokerBase):
 #                 pos = self.getposition(o_order.data, clone=False)
 #                 pos.update(o_order.size, o_order.price)
                 o_order.completed()
+                o_order.execute(float(ccxt_order['timestamp']),
+                                ccxt_order['amount'],
+                                ccxt_order['price'])
                 self.notify(o_order)
                 self.open_orders.remove(o_order)
 

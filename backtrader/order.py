@@ -500,10 +500,10 @@ class OrderBase(with_metaclass(MetaParams, object)):
         self.status = self.Partial
 
     def execute(self, dt, size, price,
-                closed, closedvalue, closedcomm,
-                opened, openedvalue, openedcomm,
-                margin, pnl,
-                psize, pprice):
+                closed=0, closedvalue=0.0, closedcomm=0.0,
+                opened=0, openedvalue=0.0, openedcomm=0.0,
+                margin=0.0, pnl=0.0,
+                psize=0, pprice=0.0):
 
         '''Receives data execution input and stores it'''
         if not size:
